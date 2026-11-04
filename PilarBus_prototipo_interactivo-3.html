@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PilarBus | Prototipo interactivo</title>
+<style>
+:root{--blue:#0756c9;--blue2:#0b73e8;--navy:#063477;--pale:#eaf2ff;--ink:#14233b;--muted:#66758c;--line:#e2eaf5;--white:#fff;--green:#16a765;--red:#e84c4c}
+*{box-sizing:border-box} body{margin:0;background:#edf3fb;color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+.app{max-width:480px;min-height:100vh;margin:auto;background:#f7faff;box-shadow:0 0 35px #12345a18;position:relative;padding-bottom:82px}
+header{background:linear-gradient(135deg,#0645a6,#0876e9);color:white;padding:18px 20px 22px;border-radius:0 0 24px 24px;position:sticky;top:0;z-index:3;box-shadow:0 5px 18px #0645a633}
+.top{display:flex;align-items:center;justify-content:space-between}.brand{font-weight:900;font-size:23px;letter-spacing:-.8px}.brand span{color:#8fd5ff}.iconbtn{border:0;background:#ffffff22;color:white;border-radius:12px;padding:9px 12px;font-size:18px;cursor:pointer}
+.subhead{font-size:12px;opacity:.85;margin-top:5px}
+main{padding:18px 16px}.screen{display:none}.screen.active{display:block}
+h1{font-size:22px;margin:0 0 5px}h2{font-size:17px;margin:0 0 12px}.muted{color:var(--muted);font-size:13px}
+.hero{background:linear-gradient(135deg,#0754c4,#0c8be9);color:white;border-radius:20px;padding:20px;margin-bottom:17px;position:relative;overflow:hidden}
+.hero:after{content:"🚌";position:absolute;right:13px;bottom:-10px;font-size:76px;opacity:.25}.hero h1{font-size:23px;max-width:230px}.hero p{font-size:13px;max-width:230px;line-height:1.45}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.tile,.card{background:white;border:1px solid var(--line);border-radius:17px;padding:15px;box-shadow:0 4px 13px #163c6810}
+.tile{cursor:pointer;text-align:left;min-height:105px;color:var(--ink);font:inherit}.tile:active,button:active{transform:scale(.985)}.tile .emoji{font-size:25px;display:block;margin-bottom:8px}.tile b{font-size:14px}.tile small{display:block;color:var(--muted);margin-top:4px;font-size:11px}
+.section{display:flex;justify-content:space-between;align-items:center;margin:20px 1px 10px}.link{color:var(--blue);border:0;background:none;font-weight:700;cursor:pointer}
+.list{display:flex;flex-direction:column;gap:9px}.rowcard{background:white;border:1px solid var(--line);border-radius:14px;padding:13px;display:flex;align-items:center;gap:12px}
+.linebadge{background:#e6f0ff;color:var(--blue);font-weight:900;border-radius:10px;padding:9px 10px}.rowcard .grow{flex:1}.rowcard b{font-size:14px}.rowcard small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.btn{border:0;border-radius:12px;padding:13px 16px;background:var(--blue);color:white;font-weight:800;font-size:14px;cursor:pointer;width:100%;box-shadow:0 5px 12px #0756c92a}.btn.secondary{background:#eaf2ff;color:var(--blue);box-shadow:none}.btn.green{background:var(--green)}
+.search{width:100%;border:1px solid var(--line);border-radius:12px;padding:13px;background:white;font-size:14px;margin:12px 0 14px;outline-color:var(--blue)}
+.tabs{display:flex;gap:7px;margin:12px 0}.tab{border:1px solid var(--line);background:white;border-radius:20px;padding:9px 12px;font-size:12px;cursor:pointer}.tab.active{background:var(--blue);color:white;border-color:var(--blue)}
+.map{height:260px;border-radius:18px;background-color:#e2eddf;background-image:linear-gradient(30deg,transparent 47%,#fff 48%,#fff 51%,transparent 52%),linear-gradient(120deg,transparent 46%,#fff 47%,#fff 50%,transparent 51%),linear-gradient(90deg,#d4e4d2 1px,transparent 1px),linear-gradient(#d4e4d2 1px,transparent 1px);background-size:100% 100%,100% 100%,35px 35px,35px 35px;position:relative;overflow:hidden;margin:12px 0}
+.route{position:absolute;left:14%;top:20%;width:70%;height:65%;border-right:5px solid #1476ed;border-bottom:5px solid #1476ed;border-radius:0 0 70% 0;transform:rotate(-12deg)}
+.pin{position:absolute;background:#0756c9;color:white;border:3px solid white;border-radius:50%;width:35px;height:35px;display:grid;place-items:center;box-shadow:0 3px 8px #12345a44}.pin.one{left:18%;top:18%}.pin.two{left:48%;top:43%}.pin.three{right:16%;bottom:17%;background:#e34d4d}
+.maplabel{position:absolute;left:12px;top:12px;background:white;border-radius:10px;padding:7px 10px;font-size:12px;font-weight:800}
+.info{background:#eaf2ff;border-radius:13px;padding:12px;font-size:13px;line-height:1.45;margin:10px 0}
+.time{font-size:17px;font-weight:850}.timeitem{display:flex;justify-content:space-between;align-items:center}
+.qty{display:flex;align-items:center;justify-content:center;gap:25px;margin:14px 0}.qty button{border:0;background:#eaf2ff;color:var(--blue);font-size:22px;width:38px;height:38px;border-radius:50%;cursor:pointer}
+.qr{margin:15px auto;width:150px;height:150px;border:9px solid white;box-shadow:0 0 0 1px var(--line);background:repeating-conic-gradient(#111 0 25%,#fff 0 50%) 0/13px 13px;position:relative}.qr:after{content:"PILARBUS";position:absolute;inset:38px 25px;background:white;display:grid;place-items:center;font-size:12px;font-weight:900}
+.alert{border-left:4px solid var(--red)}.success{color:var(--green);font-weight:800}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);background:white;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 4px calc(9px + env(safe-area-inset-bottom));z-index:5}
+nav button{background:none;border:0;color:#718098;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;min-width:58px}nav button span{font-size:20px}nav button.active{color:var(--blue);font-weight:900}
+label{font-size:12px;font-weight:800;display:block;margin:12px 0 6px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:12px;font:inherit;background:white}textarea{min-height:85px}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#14233b;color:white;padding:11px 16px;border-radius:12px;font-size:13px;display:none;z-index:9;max-width:90%;text-align:center}
+footer{text-align:center;color:#8996a9;font-size:10px;padding:20px}
+@media(min-width:600px){body{padding:18px 0}.app{border-radius:25px;overflow:hidden;min-height:850px}nav{bottom:18px;border-radius:0 0 25px 25px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="top"><div><div class="brand">Pilar<span>Bus</span></div><div class="subhead">Tu viaje, más fácil</div></div><button class="iconbtn" onclick="go('alerts')" aria-label="Notificaciones">♢</button></div></header>
+<main>
+<section id="home" class="screen active">
+<div class="hero"><h1>¡Hola! ¿A dónde vamos hoy?</h1><p>Encontrá tu línea, consultá horarios y organizá tu próximo viaje.</p></div>
+<div class="grid">
+<button class="tile" onclick="go('routes')"><span class="emoji">🚌</span><b>Ver líneas y rutas</b><small>Recorridos disponibles</small></button>
+<button class="tile" onclick="go('gps')"><span class="emoji">📍</span><b>GPS en tiempo real</b><small>Ubicación demostrativa</small></button>
+<button class="tile" onclick="go('schedules')"><span class="emoji">🕒</span><b>Consultar horarios</b><small>Salidas por línea</small></button>
+<button class="tile" onclick="go('buy')"><span class="emoji">🎟️</span><b>Comprar pasaje</b><small>Compra de demostración</small></button>
+</div>
+<div class="section"><h2>Próximos servicios</h2><button class="link" onclick="go('schedules')">Ver todos</button></div>
+<div class="list">
+<div class="rowcard"><span class="linebadge">501</span><div class="grow"><b>Pilar – Retiro</b><small>Próxima salida: 10:15 · Plataforma 2</small></div><b class="success">12 min</b></div>
+<div class="rowcard"><span class="linebadge">502</span><div class="grow"><b>Pilar – Escobar</b><small>Próxima salida: 10:25</small></div><b>22 min</b></div>
+</div>
+</section>
+<section id="routes" class="screen">
+<h1>Líneas y recorridos</h1><p class="muted">Buscá una línea para consultar su recorrido.</p><input class="search" id="routeSearch" placeholder="Buscar por número o destino..." oninput="filterRoutes()">
+<div class="list" id="routeList">
+<div class="rowcard routeitem" data-search="501 pilar retiro"><span class="linebadge">501</span><div class="grow"><b>Pilar – Retiro</b><small>Servicio urbano e interurbano</small></div><button class="link" onclick="selectRoute('501','Pilar – Retiro')">Ver ›</button></div>
+<div class="rowcard routeitem" data-search="502 pilar escobar"><span class="linebadge">502</span><div class="grow"><b>Pilar – Escobar</b><small>Conexión regional</small></div><button class="link" onclick="selectRoute('502','Pilar – Escobar')">Ver ›</button></div>
+<div class="rowcard routeitem" data-search="503 pilar san isidro"><span class="linebadge">503</span><div class="grow"><b>Pilar – San Isidro</b><small>Servicio interurbano</small></div><button class="link" onclick="selectRoute('503','Pilar – San Isidro')">Ver ›</button></div>
+<div class="rowcard routeitem" data-search="504 pilar derqui"><span class="linebadge">504</span><div class="grow"><b>Pilar – Derqui</b><small>Servicio local</small></div><button class="link" onclick="selectRoute('504','Pilar – Derqui')">Ver ›</button></div>
+<div class="rowcard routeitem" data-search="505 pilar tortuguitas"><span class="linebadge">505</span><div class="grow"><b>Pilar – Tortuguitas</b><small>Servicio local</small></div><button class="link" onclick="selectRoute('505','Pilar – Tortuguitas')">Ver ›</button></div>
+</div><div class="info">ℹ️ Los números, destinos y servicios son ilustrativos para este prototipo. Deben validarse con información oficial.</div>
+</section>
+<section id="gps" class="screen">
+<h1>GPS en tiempo real</h1><p class="muted">Seguimiento de unidades (simulación de interfaz).</p>
+<div class="map"><div class="maplabel">📍 Zona de Pilar · mapa ilustrativo</div><div class="route"></div><div class="pin one">🚌</div><div class="pin two">🚌</div><div class="pin three">●</div></div>
+<div class="rowcard"><span class="linebadge">501</span><div class="grow"><b>Unidad 24 · Pilar – Retiro</b><small>Próxima parada: Av. Tucumán</small></div><b class="success">2 min</b></div>
+<div class="info">La posición de los colectivos es ficticia. Para GPS real se necesita integrar dispositivos de geolocalización y un servicio de mapas.</div>
+<button class="btn secondary" onclick="toast('Ubicación de demostración actualizada')">Actualizar ubicación</button>
+</section>
+<section id="schedules" class="screen">
+<h1>Horarios</h1><p class="muted">Ejemplo de horarios para la línea seleccionada.</p>
+<div class="card"><b id="scheduleTitle">Línea 501 · Pilar – Retiro</b><div class="tabs"><button class="tab active" onclick="setDay(this,'Lunes a viernes')">Lun–Vie</button><button class="tab" onclick="setDay(this,'Sábados')">Sábados</button><button class="tab" onclick="setDay(this,'Domingos y feriados')">Domingos</button></div><div class="list" id="times"></div></div>
+<div class="info">Los horarios son de ejemplo y no representan una grilla oficial de transporte.</div>
+</section>
+<section id="buy" class="screen">
+<h1>Comprar pasaje</h1><p class="muted">Simulá una compra para recorrer el prototipo.</p>
+<div class="card"><div class="rowcard" style="padding:0;border:0"><span class="linebadge">501</span><div><b>Pilar – Retiro</b><small>Servicio seleccionado</small></div></div>
+<label>Cantidad de pasajes</label><div class="qty"><button onclick="changeQty(-1)">−</button><strong id="qty">1</strong><button onclick="changeQty(1)">+</button></div>
+<label>Método de pago (demostración)</label><select id="payment"><option>Tarjeta de crédito / débito</option><option>Mercado Pago</option><option>Cuenta virtual</option></select>
+<div class="info">Precio de ejemplo: $1.500 por pasaje. No se realizará ningún cobro.</div><button class="btn" onclick="buyTicket()">Confirmar compra de prueba</button></div>
+</section>
+<section id="tickets" class="screen">
+<h1>Mis pasajes</h1><p class="muted">Tus comprobantes de demostración.</p><div id="ticketEmpty" class="card">Todavía no generaste pasajes. Entrá en “Comprar pasaje” para crear uno de prueba.</div>
+<div id="ticketCard" class="card" style="display:none;text-align:center"><div class="success">✓ Compra de demostración exitosa</div><h2 style="margin-top:12px">Pilar – Retiro</h2><p class="muted">Línea 501 · Pasaje electrónico</p><div class="qr"></div><b id="ticketCode">PB-000501</b><p class="muted">Código QR ilustrativo, no válido para viajar.</p></div>
+</section>
+<section id="alerts" class="screen">
+<h1>Alertas y avisos</h1><p class="muted">Novedades de servicio de ejemplo.</p>
+<div class="list">
+<div class="rowcard alert"><span style="font-size:23px">⚠️</span><div class="grow"><b>Desvío en línea 501</b><small>Obras en una avenida. Consultá el recorrido antes de salir.</small><small>Hace 10 min · Aviso de prueba</small></div></div>
+<div class="rowcard"><span style="font-size:23px">ℹ️</span><div class="grow"><b>Demora en línea 502</b><small>Retraso estimado: 15 minutos.</small><small>Hace 30 min · Aviso de prueba</small></div></div>
+<div class="rowcard"><span style="font-size:23px">✅</span><div class="grow"><b>Servicio normal</b><small>Línea 504 circula con normalidad.</small><small>Hace 1 h · Aviso de prueba</small></div></div>
+</div>
+</section>
+<section id="profile" class="screen">
+<h1>Mi perfil</h1><div class="card" style="text-align:center;padding:22px"><div style="font-size:48px">👤</div><h2 style="margin:5px 0">Usuario PilarBus</h2><p class="muted">usuario@ejemplo.com</p></div>
+<div class="list" style="margin-top:13px">
+<div class="rowcard"><span>🎟️</span><div class="grow"><b>Mis pasajes</b><small>Ver comprobantes de prueba</small></div><button class="link" onclick="go('tickets')">›</button></div>
+<div class="rowcard"><span>🔔</span><div class="grow"><b>Notificaciones</b><small>Alertas de servicio</small></div><button class="link" onclick="go('alerts')">›</button></div>
+<div class="rowcard"><span>⚙️</span><div class="grow"><b>Configuración</b><small>Preferencias de la aplicación</small></div></div>
+</div>
+<div class="section"><h2>Reclamos y sugerencias</h2></div>
+<div class="card"><label>Tipo de mensaje</label><select id="claimType"><option>Reclamo</option><option>Sugerencia</option><option>Consulta</option></select><label>Detalle</label><textarea id="claimText" placeholder="Escribí tu mensaje..."></textarea><button class="btn" style="margin-top:10px" onclick="sendClaim()">Enviar mensaje de prueba</button></div>
+</section>
+<footer>PROTOTIPO ACADÉMICO · PILARBUS<br>Datos y operaciones simulados</footer>
+</main>
+<nav>
+<button class="active" data-screen="home" onclick="go('home')"><span>⌂</span>Inicio</button>
+<button data-screen="routes" onclick="go('routes')"><span>⌕</span>Rutas</button>
+<button data-screen="tickets" onclick="go('tickets')"><span>▣</span>Pasajes</button>
+<button data-screen="alerts" onclick="go('alerts')"><span>♢</span>Alertas</button>
+<button data-screen="profile" onclick="go('profile')"><span>♙</span>Perfil</button>
+</nav>
+<div class="toast" id="toast"></div>
+</div>
+<script>
+let quantity=1, selectedLine='501';
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));window.scrollTo({top:0,behavior:'smooth'});if(id==='schedules')renderTimes('Lunes a viernes')}
+function toast(msg){let t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.style.display='none',2600)}
+function filterRoutes(){let q=document.getElementById('routeSearch').value.toLowerCase();document.querySelectorAll('.routeitem').forEach(x=>x.style.display=x.dataset.search.includes(q)?'flex':'none')}
+function selectRoute(n,name){selectedLine=n;document.getElementById('scheduleTitle').textContent='Línea '+n+' · '+name;go('schedules');renderTimes('Lunes a viernes')}
+function renderTimes(day){let hours=day==='Sábados'?['06:00','07:00','08:15','09:30','11:00','13:00','15:30']:day==='Domingos y feriados'?['07:00','08:30','10:00','12:00','14:30','17:00']:['05:30','06:00','06:30','07:00','07:30','08:00','08:30','09:00'];document.getElementById('times').innerHTML=hours.map(h=>`<div class="rowcard timeitem"><span>◷ &nbsp; <span class="time">${h}</span></span><span class="muted">Salida estimada ›</span></div>`).join('')}
+function setDay(el,day){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderTimes(day)}
+function changeQty(n){quantity=Math.max(1,Math.min(6,quantity+n));document.getElementById('qty').textContent=quantity}
+function buyTicket(){let code='PB-'+Math.floor(100000+Math.random()*899999);document.getElementById('ticketCode').textContent=code;document.getElementById('ticketEmpty').style.display='none';document.getElementById('ticketCard').style.display='block';toast('Pasaje de prueba generado. No se realizó ningún cobro.');go('tickets')}
+function sendClaim(){let v=document.getElementById('claimText').value.trim();if(!v){toast('Escribí un mensaje antes de enviarlo.');return}document.getElementById('claimText').value='';toast('Mensaje de demostración enviado. No se transmitió a un servidor.')}
+renderTimes('Lunes a viernes');
+</script>
+</body></html>
